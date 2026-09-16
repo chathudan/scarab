@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/banner.svg" alt="Scarab — distributed SQL job server" width="100%">
+</p>
+
 # Scarab
 
 **A distributed SQL job server that queues, executes, and serves the results of heavy report queries — without ever letting them block your application or your source database.**

@@ -1,0 +1,88 @@
+<svg width="1200" height="360" viewBox="0 0 1200 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Scarab — distributed SQL job server">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e1a"/>
+      <stop offset="55%" stop-color="#0e1526"/>
+      <stop offset="100%" stop-color="#0a0e1a"/>
+    </linearGradient>
+    <radialGradient id="ballGlow" cx="50%" cy="42%" r="65%">
+      <stop offset="0%" stop-color="#3fd0ff" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#1c8fd6" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#0d4f82" stop-opacity="0.9"/>
+    </radialGradient>
+    <linearGradient id="beetleBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#233247"/>
+      <stop offset="100%" stop-color="#101823"/>
+    </linearGradient>
+    <linearGradient id="wordmark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#eaf6ff"/>
+      <stop offset="100%" stop-color="#9fd8ff"/>
+    </linearGradient>
+    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="360" fill="url(#bg)"/>
+
+  <!-- faint circuit grid -->
+  <g stroke="#1c2740" stroke-width="1" opacity="0.55">
+    <path d="M0 60 H1200 M0 130 H1200 M0 230 H1200 M0 300 H1200"/>
+    <path d="M120 0 V360 M340 0 V360 M560 0 V360 M900 0 V360 M1080 0 V360"/>
+  </g>
+  <g fill="#3fd0ff" opacity="0.5">
+    <circle cx="120" cy="60" r="2.5"/>
+    <circle cx="340" cy="130" r="2.5"/>
+    <circle cx="900" cy="300" r="2.5"/>
+    <circle cx="1080" cy="60" r="2.5"/>
+    <circle cx="560" cy="230" r="2.5"/>
+  </g>
+
+  <!-- rolled ball -->
+  <g filter="url(#softGlow)">
+    <circle cx="245" cy="205" r="72" fill="url(#ballGlow)"/>
+    <g stroke="#eaf9ff" stroke-width="1.4" opacity="0.55" fill="none">
+      <ellipse cx="245" cy="205" rx="72" ry="26"/>
+      <ellipse cx="245" cy="205" rx="30" ry="72"/>
+      <circle cx="245" cy="205" r="72"/>
+    </g>
+  </g>
+
+  <!-- motion trail -->
+  <g fill="#3fd0ff" opacity="0.35">
+    <circle cx="470" cy="270" r="4"/>
+    <circle cx="440" cy="258" r="5.5"/>
+    <circle cx="405" cy="244" r="7"/>
+  </g>
+
+  <!-- scarab beetle -->
+  <g transform="translate(365,150) rotate(-8)">
+    <!-- legs -->
+    <g stroke="#3fd0ff" stroke-width="5" stroke-linecap="round" opacity="0.85">
+      <path d="M18 55 L-18 40"/>
+      <path d="M14 78 L-22 78"/>
+      <path d="M18 100 L-14 118"/>
+      <path d="M92 55 L128 40"/>
+      <path d="M96 78 L132 78"/>
+      <path d="M92 100 L124 118"/>
+    </g>
+    <!-- wing case body -->
+    <ellipse cx="55" cy="82" rx="58" ry="72" fill="url(#beetleBody)" stroke="#3fd0ff" stroke-width="2.5" opacity="0.98"/>
+    <path d="M55 14 L55 150" stroke="#3fd0ff" stroke-width="2" opacity="0.6"/>
+    <path d="M20 40 Q55 60 90 40" stroke="#3fd0ff" stroke-width="1.4" fill="none" opacity="0.4"/>
+    <!-- head + horn -->
+    <ellipse cx="55" cy="6" rx="22" ry="18" fill="url(#beetleBody)" stroke="#3fd0ff" stroke-width="2.5"/>
+    <path d="M55 -12 L48 -34 M55 -12 L62 -34 M55 -14 L55 -38" stroke="#3fd0ff" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="45" cy="4" r="3" fill="#3fd0ff"/>
+    <circle cx="65" cy="4" r="3" fill="#3fd0ff"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="560" y="188" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="92" font-weight="700" fill="url(#wordmark)" letter-spacing="4">SCARAB</text>
+  <text x="564" y="228" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="24" fill="#8fa6c2" letter-spacing="1">Distributed SQL job server</text>
+  <rect x="564" y="244" width="230" height="3" fill="#3fd0ff" opacity="0.8"/>
+</svg>
