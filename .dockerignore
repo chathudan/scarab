@@ -1,0 +1,13 @@
+.git
+bin/
+obj/
+**/bin/
+**/obj/
+docs/
+*.md
+*.user
+*.suo
+.vs/
+TestResults/
+Scarab.Tests/
+Scarab.AppHost/

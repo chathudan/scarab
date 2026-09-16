@@ -1,0 +1,91 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  results-db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: beetle
+      POSTGRES_PASSWORD: beetle123
+      POSTGRES_DB: beetle_results
+    volumes:
+      - results-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U beetle -d beetle_results"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Demo/sample source database, seeded with a Courses table so Sql/courses.sql has
+  # something to query out of the box. Gated behind the "demo" profile (see .env) so
+  # it's never started in a production deployment that clears COMPOSE_PROFILES.
+  source-db:
+    image: mysql:8.0
+    profiles: ["demo"]
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_demo_pw
+      MYSQL_DATABASE: beetle_demo
+      MYSQL_USER: beetle_demo
+      MYSQL_PASSWORD: beetle_demo123
+    volumes:
+      - source-data:/var/lib/mysql
+      - ./db/mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # -h 127.0.0.1 (not "localhost") forces a real TCP check. mysqladmin against
+      # "localhost" connects over the Unix socket instead, which the entrypoint's
+      # temporary init server also serves - reporting healthy before the real
+      # TCP listener (what scarab actually connects to) is up.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-proot_demo_pw"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  scarab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "6060:6060"
+    depends_on:
+      redis:
+        condition: service_healthy
+      results-db:
+        condition: service_healthy
+      source-db:
+        condition: service_healthy
+        required: false
+    environment:
+      - SCARAB__App__Server=0.0.0.0:6060
+      - SCARAB__App__LogLevel=Information
+      - SCARAB__JobQueue__Broker__Addresses__0=redis:6379
+      - SCARAB__JobQueue__State__Addresses__0=redis:6379
+      - SCARAB__Results__pg_results__Type=postgres
+      - SCARAB__Results__pg_results__Dsn=Host=results-db;Port=5432;Database=beetle_results;Username=beetle;Password=beetle123;
+      - SCARAB__Results__pg_results__MaxActive=50
+      # Demo source DB. Optional=true means a missing/unreachable source-db (e.g. in
+      # production, where the "demo" profile isn't active) just logs a warning at
+      # startup instead of crashing the app.
+      - SCARAB__Db__mysql_demo__Type=mysql
+      - SCARAB__Db__mysql_demo__Dsn=Server=source-db;Port=3306;Database=beetle_demo;User=beetle_demo;Password=beetle_demo123;
+      - SCARAB__Db__mysql_demo__Optional=true
+    volumes:
+      - ./Sql:/app/Sql:ro
+      - ./appsettings.json:/app/appsettings.json:ro
+
+volumes:
+  redis-data:
+  results-data:
+  source-data:
