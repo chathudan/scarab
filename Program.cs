@@ -169,7 +169,7 @@ if (!appConfig.WorkerOnly)
         if (ctx.Request.Query.ContainsKey("sql"))
             return Results.Ok(ApiResponse.Success(tasks.Keys.ToArray()));
 
-        var taskList = tasks.ToDictionary(t => t.Key, t => new { name = t.Value.Name, queue = t.Value.Queue, concurrency = t.Value.Concurrency, raw = t.Value.RawSql });
+        var taskList = tasks.ToDictionary(t => t.Key, t => new { name = t.Value.Name, queue = t.Value.Queue, concurrency = t.Value.Concurrency, @params = t.Value.Params, raw = t.Value.RawSql });
         return Results.Ok(ApiResponse.Success(taskList));
     })
         .WithName("ListTasks")
@@ -179,10 +179,18 @@ if (!appConfig.WorkerOnly)
 
     app.MapPost("/tasks/{taskName}/jobs", async (string taskName, HttpContext ctx) =>
     {
-        JobReq? request;
-        try { request = await ctx.Request.ReadFromJsonAsync<JobReq>(); }
-        catch { return Results.BadRequest(ApiResponse.Error("Invalid JSON body")); }
-        if (request == null) return Results.BadRequest(ApiResponse.Error("Empty request body"));
+        // A task that needs no args/overrides shouldn't require a client to send "{}" -
+        // no body (or a literal `null`) just means "use all the defaults".
+        JobReq request;
+        if (ctx.Request.ContentLength is null or 0)
+        {
+            request = new JobReq();
+        }
+        else
+        {
+            try { request = await ctx.Request.ReadFromJsonAsync<JobReq>() ?? new JobReq(); }
+            catch { return Results.BadRequest(ApiResponse.Error("Invalid JSON body")); }
+        }
 
         try
         {
@@ -192,6 +200,7 @@ if (!appConfig.WorkerOnly)
         catch (ArgumentException ex) { return Results.BadRequest(ApiResponse.Error(ex.Message)); }
         catch (Exception ex) { return Results.Json(ApiResponse.Error(ex.Message), statusCode: 500); }
     })
+        .Accepts<JobReq>("application/json")
         .WithName("SubmitJob")
         .WithTags("Jobs")
         .WithSummary("Submit a job for a task")
@@ -314,6 +323,7 @@ if (!appConfig.WorkerOnly)
         }
         catch (Exception ex) { return Results.Json(ApiResponse.Error(ex.Message), statusCode: 500); }
     })
+        .Accepts<GroupReq>("application/json")
         .WithName("SubmitJobGroup")
         .WithTags("Groups")
         .WithSummary("Submit a group of jobs")

@@ -65,6 +65,10 @@ public class TaskLoader
                     else
                         task.SourceDbs = srcDbs;
 
+                    // Params (documentation only - names the positional args this task's SQL expects)
+                    if (query.Tags.TryGetValue("params", out var paramsTag) && !string.IsNullOrWhiteSpace(paramsTag))
+                        task.Params = paramsTag.Split(',').Select(p => p.Trim()).Where(p => p.Length > 0).ToArray();
+
                     // Result backends
                     if (query.Tags.TryGetValue("results", out var resTag) && !string.IsNullOrWhiteSpace(resTag))
                         task.ResultBackends = resultBackends.FilterByNames(resTag.Split(','));

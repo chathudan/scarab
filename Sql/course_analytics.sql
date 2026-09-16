@@ -63,7 +63,38 @@ ORDER BY AvgScore DESC, LessonsCompleted DESC;
 -- name: courses_by_category
 -- queue: default
 -- db: mysql_demo
+-- params: category
 SELECT CourseId, CourseName, Category, DurationHours, Instructor, Price
 FROM Courses
 WHERE Category = ?
 ORDER BY CourseName;
+
+-- name: enrollments_by_status_and_category
+-- queue: default
+-- db: mysql_demo
+-- params: status, category
+SELECT
+    u.FullName,
+    c.CourseName,
+    c.Category,
+    e.Status,
+    e.EnrolledAt
+FROM Enrollments e
+JOIN Users u ON u.UserId = e.UserId
+JOIN Courses c ON c.CourseId = e.CourseId
+WHERE e.Status = ? AND c.Category = ?
+ORDER BY e.EnrolledAt DESC;
+
+-- name: user_enrollments_by_id
+-- queue: default
+-- db: mysql_demo
+-- params: userId
+SELECT
+    c.CourseName,
+    c.Category,
+    e.Status,
+    e.EnrolledAt
+FROM Enrollments e
+JOIN Courses c ON c.CourseId = e.CourseId
+WHERE e.UserId = ?
+ORDER BY e.EnrolledAt DESC;

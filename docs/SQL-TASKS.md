@@ -58,6 +58,7 @@ Tags are SQL comments on lines immediately following the `-- name:` line, before
 | `-- results:` | string | No | Comma-separated list of result backend names (from config `Results` section). If omitted, all result backends are available and one is picked randomly. |
 | `-- raw:` | `1` | No | If set to `1`, the query is NOT prepared/validated at startup. Use for queries with complex syntax that don't prepare cleanly. |
 | `-- conc:` | int | No | Task-level concurrency override. Limits how many concurrent instances of this specific task can run. |
+| `-- params:` | comma-separated string | No | Names for the query's positional `?`/`@p1`/`$1` args, in order. Purely documentation - returned by `GET /tasks` so callers can tell what a task's args mean without reading its SQL. Not validated against the query or the job request. |
 
 ---
 

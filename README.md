@@ -86,23 +86,35 @@ dotnet run --project Scarab.AppHost
 
 This launches the same stack through the Aspire dashboard (with health checks, logs, and a direct link to the Scalar API docs on each resource) instead of raw `docker compose`. Useful if you're already working in the .NET tooling and want everything in one view.
 
+<p align="center">
+  <img src="docs/assets/aspire-demo.gif" alt="Aspire dashboard showing all Scarab resources running, with a link to the Scalar API docs" width="100%">
+</p>
+
 ### Try it
 
 ```bash
 # See what's registered
 curl http://localhost:6060/tasks?sql
 
-# Run a join/aggregation query against the seeded demo data
-curl -X POST http://localhost:6060/tasks/user_progress/jobs \
-  -H "Content-Type: application/json" -d '{}'
+# Run a join/aggregation query against the seeded demo data - no body needed
+# for a task that takes no args (a task that does just send {"args": [...]})
+curl -X POST http://localhost:6060/tasks/user_progress/jobs
 # => {"status":"success","data":{"job_id":"...", ...}}
 
 # Poll status, then read the results
 curl http://localhost:6060/jobs/<job_id>
 curl http://localhost:6060/jobs/<job_id>/data
+
+# A parameterized example - two positional args
+curl -X POST http://localhost:6060/tasks/enrollments_by_status_and_category/jobs \
+  -H "Content-Type: application/json" -d '{"args": ["completed", "Data"]}'
 ```
 
-Or skip curl entirely and browse **http://localhost:6060/scalar/v1** for interactive API docs.
+Or skip curl entirely and browse **http://localhost:6060/scalar/v1** for interactive API docs — every route is documented and you can submit real requests right from the browser:
+
+<p align="center">
+  <img src="docs/assets/scalar-demo.gif" alt="Scalar API docs: submitting a job, checking its status, and reading back the result rows" width="100%">
+</p>
 
 ### Bring your own database
 
@@ -116,6 +128,7 @@ A task is just a tagged SQL query. Drop it anywhere under `Sql/`:
 -- name: sales_by_region
 -- queue: reports
 -- db: primary_pg
+-- params: start_date, end_date
 SELECT region, SUM(amount) AS total
 FROM sales
 WHERE sale_date BETWEEN @p1 AND @p2
@@ -137,8 +150,9 @@ curl -X POST http://localhost:6060/tasks/sales_by_region/jobs \
 | `-- results:` | Restrict which result backend(s) can receive this task's output. |
 | `-- conc:` | Informational max concurrency for this task. |
 | `-- raw:` | Skip statement preparation (`1` to enable). |
+| `-- params:` | Names the query's positional args, in order — shows up in `GET /tasks` so callers know what to pass without reading the SQL. |
 
-Full tag reference: [docs/SQL-TASKS.md](docs/SQL-TASKS.md).
+Full tag reference: [docs/SQL-TASKS.md](docs/SQL-TASKS.md). Want to try parameterized tasks against the seeded demo data right now, without writing anything? [`Sql/course_analytics.sql`](Sql/course_analytics.sql) has two: `enrollments_by_status_and_category` (filter by two fields) and `user_enrollments_by_id` (look up one user's enrollments by id) — same pattern, real data.
 
 ## API at a glance
 

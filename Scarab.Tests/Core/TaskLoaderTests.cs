@@ -55,6 +55,40 @@ public class TaskLoaderTests
     }
 
     [Fact]
+    public void ParseSqlFile_WithParamsTag_ParsesParamNames()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), $"rb_test_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, "test.sql"), """
+            -- name: filtered_report
+            -- params: status, category
+            SELECT 1 WHERE status = ? AND category = ?;
+            """);
+
+        var loader = new TaskLoader(new Microsoft.Extensions.Logging.Abstractions.NullLogger<TaskLoader>());
+        var tasks = loader.LoadTasks([dir], new Scarab.DbPool.DbPool(), new Scarab.ResultBackends.ResultBackendCollection(), new AppConfig());
+
+        Assert.Equal(["status", "category"], tasks["filtered_report"].Params);
+
+        Directory.Delete(dir, true);
+    }
+
+    [Fact]
+    public void ParseSqlFile_NoParamsTag_ParamsIsEmpty()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), $"rb_test_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, "test.sql"), "-- name: no_params\nSELECT 1;");
+
+        var loader = new TaskLoader(new Microsoft.Extensions.Logging.Abstractions.NullLogger<TaskLoader>());
+        var tasks = loader.LoadTasks([dir], new Scarab.DbPool.DbPool(), new Scarab.ResultBackends.ResultBackendCollection(), new AppConfig());
+
+        Assert.Empty(tasks["no_params"].Params);
+
+        Directory.Delete(dir, true);
+    }
+
+    [Fact]
     public void ParseSqlFile_MultipleQueries_ParsesAll()
     {
         var dir = Path.Combine(Path.GetTempPath(), $"rb_test_{Guid.NewGuid():N}");
